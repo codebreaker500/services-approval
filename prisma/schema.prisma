@@ -1,0 +1,88 @@
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+        
+
+model Dealer {
+  id          Int      @id @default(autoincrement())
+  email       String   @unique
+  NIK         String   @unique
+  phoneNumber String
+  address     String
+  confirmed   Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  deposito Deposito[]
+}
+
+model User {
+  id       Int      @id @default(autoincrement())
+  dealerId Int?     @unique
+  name     String
+  email    String   @unique
+  password String
+  role     Role
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Deposito {
+  id              Int        @id @default(autoincrement())
+  dealerId        Int
+  placementDate   DateTime
+  placementNominal Float
+  tenor           Int
+  status          DepositoStatus @default(PENDING)
+  settlements     SettlementDeposito[]
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  dealer          Dealer @relation(fields: [dealerId], references: [id])
+}
+
+model Approval {
+  id            Int      @id @default(autoincrement())
+  depositoId    Int
+  userId        Int
+  role          Role
+  status        ApprovalStatus @default(PENDING)
+  createdAt     DateTime @default(now())
+}
+
+model SettlementDeposito {
+  id              Int        @id @default(autoincrement())
+  depositoId      Int
+  stockCode       String
+  amount          Float
+  createdAt       DateTime @default(now())
+  deposito        Deposito @relation(fields: [depositoId], references: [id])
+}
+
+enum Role {
+  DEALER
+  ASSISTANT_DEPUTY_INVESTMENT
+  DEPUTY_INVESTMENT
+  DIRECTOR_INVESTMENT
+  ASSISTANT_DEPUTY_SETTLEMENT
+  DEPUTY_SETTLEMENT
+  SETTLEMENT_ARRANGER
+}
+
+enum DepositoStatus {
+  PENDING
+  APPROVED_INVESTMENT
+  APPROVED_SETTLEMENT
+  SETTLED
+}
+
+enum ApprovalStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
