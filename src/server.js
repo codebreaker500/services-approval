@@ -16,17 +16,15 @@ app.use(express.json());
 
 app.use(
   cors({
-    origin: '*', // Allow all origins
+    origin: '*', 
   })
 );
 
-// Create HTTP server
 const server = createServer(app);
 
-// Initialize Socket.IO
 const io = new Server(server, {
   cors: {
-    origin: '*', // Allow all origins (update for production)
+    origin: '*', 
     methods: ['GET', 'POST'],
   },
 });
@@ -34,16 +32,15 @@ const io = new Server(server, {
 app.use("/api/", router);
 
 app.use((req, res, next) => {
-  req.io = io; // Attach io instance to the request
+  req.io = io; 
   next();
 });
 
-// Start the server
 server.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
 
-// Handle socket connections
+
 io.on('connection', (socket) => {
   console.log('A user connected:', socket.id);
 
