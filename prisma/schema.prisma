@@ -39,6 +39,7 @@ model Deposito {
   placementDate   DateTime
   placementNominal Float
   tenor           Int
+  rate            Int
   status          DepositoStatus @default(PENDING)
   settlements     SettlementDeposito[]
   createdAt       DateTime @default(now())

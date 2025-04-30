@@ -1,5 +1,5 @@
-const { PrismaClient } = require('@prisma/client');
-const bcrypt = require('bcryptjs');
+import { PrismaClient } from '@prisma/client';
+import { hash } from 'bcrypt';
 
 const prisma = new PrismaClient();
 
@@ -7,7 +7,7 @@ async function main() {
   console.log('Seeding data...');
 
   // Hash password
-  const hashedPassword = await bcrypt.hash('password123', 10);
+  const hashedPassword = await hash('password123', 10);
 
   // 1. Create Dealers
   const dealer1 = await prisma.dealer.create({
@@ -86,6 +86,7 @@ async function main() {
       placementDate: new Date(),
       placementNominal: 100000000, // 100 juta
       tenor: 6, // 6 bulan
+      rate: 2,
       status: 'PENDING',
     },
   });

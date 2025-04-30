@@ -3,6 +3,8 @@ import jwt from 'jsonwebtoken'; // Add this line
 import prisma from '../prismaClient.js';
 import sendEmail from '../utils/email.js';
 
+
+
 const login = async (req, res) => {
   const { email, password } = req.body;
   try {
@@ -12,7 +14,11 @@ const login = async (req, res) => {
       return res.status(401).json({ message: 'Invalid credentials' });
     }
 
-    const token = jwt.sign({ id: user.id, role: user.role }, process.env.JWT_SECRET, { expiresIn: '1h' });
+    const token = jwt.sign({ 
+      id: user.id, 
+      role: user.role,
+      dealerId: user.dealerId,
+    }, process.env.JWT_SECRET, { expiresIn: '1h' });
     res.json({ token });
   } catch (error) {
     console.error('Error during login:', error);
@@ -94,4 +100,29 @@ const createUserForDealer = async (req, res) => {
   }
 };
 
-export { registerDealer, confirmEmail, createUserForDealer, login };
+const getProfile = async (req, res) => {
+  const token = req.headers.authorization?.split(' ')[1];
+
+  if (!token) {
+    return res.status(401).json({ message: 'No token provided' });
+  }
+
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const user = await prisma.user.findUnique({
+      where: { id: decoded.id },
+      select: { id: true, name: true, email: true, role: true, dealerId: true },
+    });
+
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    res.status(200).json({ profile: user });
+  } catch (error) {
+    console.error('Error fetching profile:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+};
+
+export { registerDealer, confirmEmail, createUserForDealer, login, getProfile };

@@ -1,21 +1,27 @@
 import prisma from '../prismaClient.js';
+import jwt from 'jsonwebtoken';
 
 const createDeposito = async (req, res) => {
-  const { dealerId, placementDate, placementNominal, tenor } = req.body;
+  const token = req.headers.authorization?.split(' ')[1];
+  if (!token) {
+    return res.status(401).json({ message: 'Unauthorized: No token provided' });
+  }
+
+  const { placementNominal, tenor, rate } = req.body;
+  
   try {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const { dealerId } = decoded;
+
     const deposito = await prisma.deposito.create({
       data: {
         dealerId,
-        placementDate: new Date(placementDate),
+        placementDate: new Date(),
         placementNominal,
         tenor,
+        rate,
         status: 'PENDING',
       },
-    });
-
-    req.io.emit('newDeposito', {
-      message: 'A new deposito request has been created',
-      deposito,
     });
 
     res.status(201).json({ message: 'Deposito created.', deposito });
@@ -26,9 +32,46 @@ const createDeposito = async (req, res) => {
 };
 
 const listDepositos = async (req, res) => {
-  const depositos = await prisma.deposito.findMany();
-  
-  res.json(depositos);
+  const token = req.headers.authorization?.split(' ')[1];
+  if (!token) {
+    return res.status(401).json({ message: 'Unauthorized: No token provided' });
+  }
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const { role, dealerId } = decoded;
+
+    const { page = 1, limit = 10 } = req.query;
+    const skip = (page - 1) * limit;
+
+    let depositos;
+    let totalCount;
+
+    if (role === 'DEALER') {
+      totalCount = await prisma.deposito.count({
+        where: { dealerId },
+      });
+      depositos = await prisma.deposito.findMany({
+        where: { dealerId },
+        skip: parseInt(skip),
+        take: parseInt(limit),
+      });
+    } else {
+      totalCount = await prisma.deposito.count();
+      depositos = await prisma.deposito.findMany({
+        skip: parseInt(skip),
+        take: parseInt(limit),
+      });
+    }
+
+    res.json({
+      totalCount,
+      totalPages: Math.ceil(totalCount / limit),
+      currentPage: parseInt(page),
+      depositos,
+    });
+  } catch (error) {
+    res.status(500).json({ message: 'Internal server error' });
+  }
 };
 
 const getDepositoDetails = async (req, res) => {
