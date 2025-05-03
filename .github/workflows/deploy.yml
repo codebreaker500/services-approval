@@ -35,7 +35,7 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
             export PATH=$PATH:/usr/bin:/usr/local/node-20.9.0/bin
-            cd /home/ubuntu/app
+            cd /home/ubuntu/app/services-approval
             cat <<EOF > .env
             PORT=${{ vars.PORT }}
             EMAIL_USER=${{ vars.EMAIL_USER }}
