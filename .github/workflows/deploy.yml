@@ -44,5 +44,5 @@ jobs:
             DIRECT_URL=${{ secrets.DIRECT_URL }}
             JWT_SECRET=${{ secrets.JWT_SECRET }}
             EOF
-            npm install --production
-            pm2 restart app || pm2 start index.js --name app
+            npm install
+            pm2 restart services-approval || pm2 start src/server.js --name services-approval
