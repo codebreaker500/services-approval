@@ -25,7 +25,7 @@ jobs:
           username: ${{ secrets.SSH_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           source: "."
-          target: "/home/ubuntu/app"
+          target: "/home/ubuntu/app/services-approval"
 
       - name: SSH and write .env file, install deps, restart app
         uses: appleboy/ssh-action@v0.1.8
