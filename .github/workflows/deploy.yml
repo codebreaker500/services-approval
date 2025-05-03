@@ -34,6 +34,7 @@ jobs:
           username: ${{ secrets.SSH_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
+            export PATH=$PATH:/usr/bin:/usr/local/node-20.9.0/bin
             cd /home/ubuntu/app
             cat <<EOF > .env
             PORT=${{ vars.PORT }}
