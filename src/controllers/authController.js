@@ -14,11 +14,20 @@ const login = async (req, res) => {
       return res.status(401).json({ message: 'Invalid credentials' });
     }
 
-    const token = jwt.sign({ 
-      id: user.id, 
-      role: user.role,
-      dealerId: user.dealerId,
-    }, process.env.JWT_SECRET, { expiresIn: '1h' });
+    const token = jwt.sign(
+      { id: user.id, role: user.role, dealerId: user.dealerId },
+      process.env.JWT_SECRET,
+      { expiresIn: '1h' }
+    );
+
+    if (req.io) {
+      req.io.emit('userLoggedIn', {
+        userId: user.id,
+        role: user.role,
+        message: 'User logged in successfully',
+      });
+    }
+
     res.json({ token });
   } catch (error) {
     console.error('Error during login:', error);

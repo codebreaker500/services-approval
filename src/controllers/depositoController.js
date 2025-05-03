@@ -6,9 +6,7 @@ const createDeposito = async (req, res) => {
   if (!token) {
     return res.status(401).json({ message: 'Unauthorized: No token provided' });
   }
-
   const { placementNominal, tenor, rate } = req.body;
-  
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
     const { dealerId } = decoded;
@@ -25,6 +23,7 @@ const createDeposito = async (req, res) => {
     });
 
     res.status(201).json({ message: 'Deposito created.', deposito });
+    
   } catch (error) {
     console.error('Error creating deposito:', error);
     res.status(500).json({ message: 'Internal server error' });
